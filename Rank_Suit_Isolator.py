@@ -4,7 +4,7 @@ import time
 import Cards
 import os
 
-img_path = os.path.dirname(os.path.abspath(__file__)) + '/Card_Imgs/'
+img_path = os.path.dirname(os.path.abspath(__file__)) + '/Cards/'
 
 IM_WIDTH = 1280
 IM_HEIGHT = 720

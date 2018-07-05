@@ -20,10 +20,10 @@ SUIT_DIFF_MAX = 700
 CARD_MAX_AREA = 120000
 CARD_MIN_AREA = 25000
 
-font = cv2.FONT_HERSHEY_SIMPLEX
+font = cv2.FONT_HERSHEY_DUPLEX
 
 class Query_card:
-    """Structure to store information about query cards in the camera image."""
+    #store information about cards - Structure
 
     def __init__(self):
         self.contour = [] 
@@ -39,22 +39,21 @@ class Query_card:
         self.suit_diff = 0 
 
 class Train_ranks:
-    """Structure to store information about train rank images."""
+    #store information about train rank images
 
     def __init__(self):
         self.img = [] 
         self.name = "Placeholder"
 
 class Train_suits:
-    """Structure to store information about train suit images."""
+    #store information about train suit images
 
     def __init__(self):
         self.img = [] 
         self.name = "Placeholder"
 
 def load_ranks(filepath):
-    """Loads rank images from directory specified by filepath. Stores
-    them in a list of Train_ranks objects."""
+    #load train rank images from directory
 
     train_ranks = []
     i = 0
@@ -70,8 +69,7 @@ def load_ranks(filepath):
     return train_ranks
 
 def load_suits(filepath):
-    """Loads suit images from directory specified by filepath. Stores
-    them in a list of Train_suits objects."""
+    #load suit images from directory
 
     train_suits = []
     i = 0
@@ -86,7 +84,7 @@ def load_suits(filepath):
     return train_suits
 
 def preprocess_image(image):
-    """Returns a grayed, blurred, and adaptively thresholded camera image."""
+    #Return a grayed, blurred, and adaptively thresholded image
 
     gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray,(5,5),0)
@@ -100,9 +98,8 @@ def preprocess_image(image):
     return thresh
 
 def find_cards(thresh_image):
-    """Finds all card-sized contours in a thresholded camera image.
-    Returns the number of cards, and a list of card contours sorted
-    from largest to smallest."""
+    #Find all card-sized contours in a thresholded camera image.
+    #Return the number of cards.
 
     dummy,cnts,hier = cv2.findContours(thresh_image,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     index_sort = sorted(range(len(cnts)), key=lambda i : cv2.contourArea(cnts[i]),reverse=True)
@@ -118,7 +115,7 @@ def find_cards(thresh_image):
         cnts_sort.append(cnts[i])
         hier_sort.append(hier[0][i])
 
-    for i in range(len(cnts_sort)):
+    for i in xrange(len(cnts_sort)):
         size = cv2.contourArea(cnts_sort[i])
         peri = cv2.arcLength(cnts_sort[i],True)
         approx = cv2.approxPolyDP(cnts_sort[i],0.01*peri,True)
@@ -130,8 +127,8 @@ def find_cards(thresh_image):
     return cnts_sort, cnt_is_card
 
 def preprocess_card(contour, image):
-    """Uses contour to find information about the query card. Isolates rank
-    and suit images from the card."""
+    #Use contour to find information about the query card.
+    #Isolate rank and suit images from the card.
 
     qCard = Query_card()
 
@@ -185,9 +182,7 @@ def preprocess_card(contour, image):
     return qCard
 
 def match_card(qCard, train_ranks, train_suits):
-    """Finds best rank and suit matches for the query card. Differences
-    the query card rank and suit images with the train rank and suit images.
-    The best match is the rank or suit image that has the least difference."""
+    #Find the best rank and suit matches for the query card. 
 
     best_rank_match_diff = 10000
     best_suit_match_diff = 10000
@@ -228,7 +223,7 @@ def match_card(qCard, train_ranks, train_suits):
     
     
 def draw_results(image, qCard):
-    """Draw the card name, center point, and contour on the camera image."""
+    #Draw the card name, center point, and contour on the video output.
 
     x = qCard.center[0]
     y = qCard.center[1]
@@ -246,9 +241,8 @@ def draw_results(image, qCard):
     return image
 
 def flattener(image, pts, w, h):
-    """Flattens an image of a card into a top-down 200x300 perspective.
-    Returns the flattened, re-sized, grayed image.
-    See www.pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/"""
+    #Flattens an image of a card into a top-down 200x300 perspective.
+    
     temp_rect = np.zeros((4,2), dtype = "float32")
     
     s = np.sum(pts, axis = 2)
@@ -296,7 +290,5 @@ def flattener(image, pts, w, h):
     M = cv2.getPerspectiveTransform(temp_rect,dst)
     warp = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
     warp = cv2.cvtColor(warp,cv2.COLOR_BGR2GRAY)
-
-        
 
     return warp
